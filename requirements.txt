@@ -17,4 +17,6 @@
 -Naive bayes
 -Calcul des métriques avec plusieurs iterations (Accuracy, Precison, F1-score, T-Colinéarité, Interprétation)
 
+ToDo Exploration data
+
 
