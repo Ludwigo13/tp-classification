@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 
 print("Importing data")
-df = pd.read_csv("pet_adoption_data.csv")
+df = pd.read_csv("data/pet_adoption_data.csv")
 df.head()
 
 
