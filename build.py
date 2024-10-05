@@ -51,8 +51,41 @@ print(f"  Test individuals: {len(x_test)}")
 print("Models creation")
 
 print(" RandomForest")
+print("  Find best estimators")
+n_range = range(135, 145)
+scores = []
+for n in n_range:
+    classifier = RandomForestClassifier(n_estimators=n, random_state=13)
+    classifier.fit(x_train, y_train)
+    y_pred = classifier.predict(x_test)
+    scores.append(accuracy_score(y_test, y_pred))
+plt.plot(n_range, scores)
+plt.xlabel('Value of n_estimators for RandomForestClassifier')
+plt.ylabel('Testing Accuracy')
+plt.savefig("docs/plot_BestEstimators.png")
+print("   Build model")
 RFclassifier = RandomForestClassifier(n_estimators=140, random_state=42)
 RFclassifier.fit(x_train, y_train)
 y_pred = RFclassifier.predict(x_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"  Accuracy is {accuracy}")
+print(f"   (n=140)Accuracy is {accuracy}")
+
+
+print("Build HTML")
+html_content = f'''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plot Output</title>
+</head>
+<body>
+    <h1>Plot Output</h1>
+    <p>RandomForest, estimators plot:</p>
+    <img src="plot_BestEstimators.png">
+</body>
+</html>
+'''
+with open('docs/index.html', 'w') as file:
+    file.write(html_content)

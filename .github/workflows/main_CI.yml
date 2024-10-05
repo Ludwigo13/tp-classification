@@ -39,3 +39,9 @@ jobs:
           ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
         run: python build.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
