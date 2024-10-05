@@ -52,7 +52,7 @@ print("Models creation")
 
 print(" RandomForest")
 print("  Find best estimators")
-n_range = range(135, 145)
+n_range = range(1, 200)
 scores = []
 for n in n_range:
     classifier = RandomForestClassifier(n_estimators=n, random_state=13)
