@@ -33,13 +33,16 @@ jobs:
       - name: Install required modules
         run: pip install -r modules.txt
           
-      - name: cml_run
+      - name: Pre-processing and Build models
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
         run: python build.py
 
+      - name: Build HTML Report
+        run: python html_builder.py
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

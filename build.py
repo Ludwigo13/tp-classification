@@ -8,51 +8,71 @@ from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
+import json
+import utils
+
+report = {}
 
 print("Importing data")
+report['Data'] = {}
 df = pd.read_csv("data/pet_adoption_data.csv")
-print(df.head())
-
+filename = 'df_fulldata.png'
+utils.save_dataframe_head_as_png(df, f'docs/{filename}')
+report['Data']['Raw'] = filename
 
 print("Start Pre-processing")
+report['Data']['Pre-Processing'] = {}
 
 print(" Get descriptors")
 x = df.drop(["PetID", "AdoptionLikelihood"], axis=1)
-print(x.head())
+filename = 'df_descriptors.png'
+utils.save_dataframe_head_as_png(x, f'docs/{filename}')
+report['Data']['Pre-Processing']['Descriptors'] = filename
 
 print(" Get target")
 target = df['AdoptionLikelihood']
-print(target.head())
+filename = 'df_target.png'
+utils.save_dataframe_head_as_png(target, f'docs/{filename}')
+report['Data']['Pre-Processing']['Target'] = filename
 
 print(" Scale data")
 numerical_variables = ['AgeMonths','WeightKg','TimeInShelterDays','AdoptionFee']
 scaler = StandardScaler()
 x[numerical_variables] = scaler.fit_transform(x[numerical_variables])
-print(x.head())
+filename = 'df_standard_scaler.png'
+utils.save_dataframe_head_as_png(x, f'docs/{filename}')
+report['Data']['Pre-Processing']['Scaling'] = filename
 
 print(" Encode")
 cat_variables = ['PetType', 'Breed', 'Color']
 x = pd.get_dummies(x, columns=cat_variables, prefix=cat_variables)
 encoder = OrdinalEncoder(categories=[['Small', 'Medium', 'Large']])
 x['Size'] = encoder.fit_transform(x[['Size']])
-print(x.head())
+filename = 'df_encode.png'
+utils.save_dataframe_head_as_png(x, f'docs/{filename}')
+report['Data']['Pre-Processing']['Encoding'] = filename
 
-print(" Set 0/1 to bool")
+print(" Set 0/1 to Bool")
 bool_variables = ['Vaccinated', 'HealthCondition', 'PreviousOwner']
 x[bool_variables] = x[bool_variables].astype(bool)
-print(x.head())
+filename = 'df_bool.png'
+utils.save_dataframe_head_as_png(x, f'docs/{filename}')
+report['Data']['Pre-Processing']['Set 0/1 to Bool'] = filename
 
 print(" Split data for training/test")
+report['Data']['Train/test split'] = {}
 x_train, x_test, y_train, y_test = train_test_split(x, target, test_size=0.2, random_state=42)
-print(f"  Train individuals: {len(x_train)}")
-print(f"  Test individuals: {len(x_test)}")
+report['Data']['Train/test split']['Train individuals'] = len(x_train)
+report['Data']['Train/test split']['Test individuals'] = len(x_test)
 
 
 print("Models creation")
+report['Models'] = {}
 
 print(" RandomForest")
+report['Models']['RandomForest'] = {}
 print("  Find best estimators")
-n_range = range(1, 200)
+n_range = range(50, 70)
 scores = []
 for n in n_range:
     classifier = RandomForestClassifier(n_estimators=n, random_state=13)
@@ -62,30 +82,19 @@ for n in n_range:
 plt.plot(n_range, scores)
 plt.xlabel('Value of n_estimators for RandomForestClassifier')
 plt.ylabel('Testing Accuracy')
-plt.savefig("docs/plot_BestEstimators.png")
+fig_path = 'plot_BestEstimators.png'
+plt.savefig(f"docs/{fig_path}")
+report['Models']['RandomForest']['Best estimators'] = fig_path
 print("   Build model")
 RFclassifier = RandomForestClassifier(n_estimators=140, random_state=42)
 RFclassifier.fit(x_train, y_train)
 y_pred = RFclassifier.predict(x_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"   (n=140)Accuracy is {accuracy}")
+report['Models']['RandomForest']['Accuracy'] = f'{accuracy} %'
+
+print(" Naive Bayes")
+report['Models']['Naive Bayes'] = {}
 
 
-print("Build HTML")
-html_content = f'''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plot Output</title>
-</head>
-<body>
-    <h1>Plot Output</h1>
-    <p>RandomForest, estimators plot:</p>
-    <img src="plot_BestEstimators.png">
-</body>
-</html>
-'''
-with open('docs/index.html', 'w') as file:
-    file.write(html_content)
+with open('docs/report.json', 'w') as file:
+    file.write(json.dumps(report))
