@@ -28,6 +28,9 @@ jobs:
         with:
           submodules: 'true'
 
+      - name: Clean up Git repository
+        run: rm -rf .git
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
