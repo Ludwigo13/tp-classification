@@ -1,13 +1,13 @@
 print("Loading Modules")
 import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OrdinalEncoder
-from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
 import matplotlib.pyplot as plt
+import seaborn as sns
 import json
 import utils
 
@@ -89,11 +89,47 @@ print("   Build model")
 RFclassifier = RandomForestClassifier(n_estimators=140, random_state=42)
 RFclassifier.fit(x_train, y_train)
 y_pred = RFclassifier.predict(x_test)
+conf_matrix = confusion_matrix(y_test, y_pred)
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+plt.ylabel('Actual')
+plt.xlabel('Predicted')
+plt.title('Confusion Matrix')
+fig_path = 'plot_rf_conf_matrix.png'
+plt.savefig(f"docs/{fig_path}")
+plt.clf()
+report['Models']['RandomForest']['Confusion Matrix'] = fig_path
 accuracy = accuracy_score(y_test, y_pred)
-report['Models']['RandomForest']['Accuracy'] = f'{accuracy} %'
+precision = precision_score(y_test, y_pred, average='macro')
+recall = recall_score(y_test, y_pred, average='macro')
+f1 = f1_score(y_test, y_pred, average='macro')
+report['Models']['RandomForest']['Accuracy'] = '{:.2f} %'.format(accuracy)
+report['Models']['RandomForest']['Precision'] = '{:.2f} %'.format(precision)
+report['Models']['RandomForest']['Sensibilite'] = '{:.2f} %'.format(recall)
+report['Models']['RandomForest']['F1-Score'] = f1
 
 print(" Naive Bayes")
 report['Models']['Naive Bayes'] = {}
+print("  Build model")
+nb = GaussianNB()
+nb.fit(x_train, y_train)
+y_pred = nb.predict(x_test)
+conf_matrix = confusion_matrix(y_test, y_pred)
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+plt.ylabel('Actual')
+plt.xlabel('Predicted')
+plt.title('Confusion Matrix')
+fig_path = 'plot_nb_conf_matrix.png'
+plt.savefig(f"docs/{fig_path}")
+plt.clf()
+report['Models']['Naive Bayes']['Confusion Matrix'] = fig_path
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='macro')
+recall = recall_score(y_test, y_pred, average='macro')
+f1 = f1_score(y_test, y_pred, average='macro')
+report['Models']['Naive Bayes']['Accuracy'] = '{:.2f} %'.format(accuracy)
+report['Models']['Naive Bayes']['Precision'] = '{:.2f} %'.format(precision)
+report['Models']['Naive Bayes']['Sensibilite'] = '{:.2f} %'.format(recall)
+report['Models']['Naive Bayes']['F1-Score'] = f1
 
 
 with open('docs/report.json', 'w') as file:
